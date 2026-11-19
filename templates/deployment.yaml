@@ -4,6 +4,10 @@ metadata:
   name: {{ include "orders-api.fullname" . }}
   labels:
     {{- include "orders-api.labels" . | nindent 4 }}
+  annotations:
+    # After the ConfigMaps (wave -1). The new page is already in the cluster
+    # when this rolls the pods.
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}

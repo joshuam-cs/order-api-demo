@@ -1,7 +1,0 @@
-orders-api is available in this namespace on port {{ .Values.service.port }}.
-The page shows version {{ .Values.version }} from the orders-config ConfigMap.
-
-  kubectl -n <namespace> port-forward svc/{{ include "orders-api.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
-
-Edit `version` (or config.logLevel / config.dbHost) in the values file and sync.
-checksum/config on the pod template changes with the ConfigMap, so the Deployment rolls.
