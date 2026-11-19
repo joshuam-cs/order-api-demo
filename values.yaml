@@ -7,7 +7,7 @@ fullnameOverride: orders-api
 # Page version. Rendered into the orders-config ConfigMap.
 # Change it and sync: the ConfigMap updates, checksum/config changes,
 # and the Deployment rolls so nginx serves the new page.
-version: v1.4
+version: v1.5
 
 replicaCount: 1
 
