@@ -1,0 +1,52 @@
+# Defaults. Environment files override only what differs.
+# helm template orders-api . -f values-prod.yaml
+
+# Object names match the talk: Deployment/Service orders-api.
+fullnameOverride: orders-api
+
+# Page version. Rendered into the orders-config ConfigMap.
+# Change it and sync: the ConfigMap updates, checksum/config changes,
+# and the Deployment rolls so nginx serves the new page.
+version: v1.3
+
+replicaCount: 1
+
+image:
+  repository: nginx
+  tag: "1.27-alpine"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+# Injected as env vars (APP_VERSION, LOG_LEVEL, DB_HOST) and shown on the page.
+config:
+  logLevel: info
+  dbHost: orders-db
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+# Talk: boot one new pod, wait until healthy, then retire an old one.
+strategy:
+  maxUnavailable: 0
+  maxSurge: 1
+
+ingress:
+  enabled: false
+  className: nginx
+  host: api.company.com
+  path: /orders
+  annotations: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70

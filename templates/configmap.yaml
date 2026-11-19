@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "orders-api.configMapName" . }}
+  labels:
+    {{- include "orders-api.labels" . | nindent 4 }}
+data:
+  APP_VERSION: {{ .Values.version | quote }}
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  DB_HOST: {{ .Values.config.dbHost | quote }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "orders-api.nginxConfigMapName" . }}
+  labels:
+    {{- include "orders-api.labels" . | nindent 4 }}
+data:
+  default.conf: |
+    server {
+        listen {{ .Values.service.port }};
+        server_name _;
+        server_tokens off;
+
+        location /health/live {
+            access_log off;
+            default_type text/plain;
+            return 200 'ok\n';
+        }
+
+        location /health/ready {
+            access_log off;
+            default_type text/plain;
+            return 200 'ok\n';
+        }
+
+        location / {
+            root /usr/share/nginx/html;
+            index index.html;
+            # Ingress sends /orders; there is no such file, so serve the version page.
+            # $ is escaped so Helm does not treat it as a template variable.
+            try_files {{ "$uri" }} {{ "$uri/" }} /index.html;
+        }
+    }
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <title>orders-api {{ .Values.version }}</title>
+      <style>
+        body { font-family: sans-serif; margin: 3rem; color: #1a1a1a; }
+        .version { font-size: 3rem; font-weight: 700; margin: 0.2rem 0 1.5rem; }
+        dt { font-weight: 700; }
+        dd { margin: 0 0 0.6rem; font-family: ui-monospace, monospace; }
+      </style>
+    </head>
+    <body>
+      <h1>orders-api</h1>
+      <p class="version">{{ .Values.version }}</p>
+      <dl>
+        <dt>APP_VERSION</dt>
+        <dd>{{ .Values.version }}</dd>
+        <dt>LOG_LEVEL</dt>
+        <dd>{{ .Values.config.logLevel }}</dd>
+        <dt>DB_HOST</dt>
+        <dd>{{ .Values.config.dbHost }}</dd>
+      </dl>
+    </body>
+    </html>
